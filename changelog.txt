@@ -1,3 +1,6 @@
+[B]Version 0.1.1[/B]
++ Automatic download manager for binaries
+
 [B]Version 0.1.0[/B]
 + Torrent2http binaries updated to 1.0.5
 + Added Android Lollipop 5/Marshmallow 6 ARM support
