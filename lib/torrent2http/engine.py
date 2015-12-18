@@ -9,7 +9,7 @@ import time
 import urllib2
 import httplib
 from os.path import dirname
-from bin.functions import *
+from download import LibraryManager
 
 import logpipe
 import mimetypes
