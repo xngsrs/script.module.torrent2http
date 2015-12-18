@@ -9,6 +9,7 @@ import time
 import urllib2
 import httplib
 from os.path import dirname
+from bin.functions import *
 
 import logpipe
 import mimetypes
@@ -56,9 +57,14 @@ class Engine:
         binary = "torrent2http" + (".exe" if self.platform.system == 'windows' else "")
         binary_dir = os.path.join(binaries_path, "%s_%s" % (self.platform.system, self.platform.arch))
         binary_path = os.path.join(binary_dir, binary)
+        lm=LibraryManager(binary_dir, "%s_%s" % (self.platform.system, self.platform.arch))
         if not os.path.isfile(binary_path):
-            raise Error("Can't find torrent2http binary for %s" % self.platform,
-                        Error.UNKNOWN_PLATFORM, platform=str(self.platform))
+            success=lm.download()
+            if not success:
+                raise Error("Can't find torrent2http or download binary for %s" % self.platform,
+                            Error.UNKNOWN_PLATFORM, platform=str(self.platform))
+        else:
+            lm.update()
 
         if not self._ensure_binary_executable(binary_path):
             if self.platform.system == "android":
