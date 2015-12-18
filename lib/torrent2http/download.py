@@ -33,7 +33,7 @@ class LibraryManager():
             __settings__.setSetting('plugin_name', __plugin__)
             for libname in get_libname(self.platform):
                 self.libpath = os.path.join(self.dest_path, libname)
-                self.sizepath=os.path.join(self.dest_path, self.platform, libname+'.size.txt')
+                self.sizepath=os.path.join(self.dest_path, libname+'.size.txt')
                 size=str(os.path.getsize(self.libpath))
                 size_old=open( self.sizepath, "r" ).read()
                 if size_old!=size:
