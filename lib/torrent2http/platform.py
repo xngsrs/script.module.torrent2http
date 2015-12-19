@@ -17,6 +17,8 @@ class Platform:
     def arch():
         if sys.platform.lower().startswith('linux') and (uname()[4].lower().startswith('arm') or
                                                          uname()[4].lower().startswith('aarch')):
+            if uname()[4].lower().startswith('armv6'):
+                return "armv6"
             return 'arm'
         elif sys.maxsize > 2**32:
             return 'x64'
