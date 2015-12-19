@@ -1,3 +1,6 @@
+[B]Version 0.1.2[/B]
++ Torrent2http binaries for Raspberry Pi v1 (arm v6)
+
 [B]Version 0.1.1[/B]
 + Automatic download manager for binaries
 
