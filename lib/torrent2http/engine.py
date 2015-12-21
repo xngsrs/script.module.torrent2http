@@ -30,8 +30,12 @@ class Engine:
     def _ensure_binary_executable(self, path):
         st = os.stat(path)
         if not st.st_mode & stat.S_IEXEC:
-            self._log("%s is not executable, trying to change its mode..." % path)
-            os.chmod(path, st.st_mode | stat.S_IEXEC)
+            try:
+                self._log("%s is not executable, trying to change its mode..." % path)
+                os.chmod(path, st.st_mode | stat.S_IEXEC)
+            except Exception, e:
+                self._log("Failed! Exception: %s" % str(e))
+                return False
             st = os.stat(path)
             if st.st_mode & stat.S_IEXEC:
                 self._log("Succeeded")
@@ -63,8 +67,6 @@ class Engine:
             if not success:
                 raise Error("Can't find torrent2http or download binary for %s" % self.platform,
                             Error.UNKNOWN_PLATFORM, platform=str(self.platform))
-        else:
-            lm.update()
 
         if not self._ensure_binary_executable(binary_path):
             if self.platform.system == "android":
