@@ -67,6 +67,8 @@ class Engine:
             if not success:
                 raise Error("Can't find torrent2http or download binary for %s" % self.platform,
                             Error.UNKNOWN_PLATFORM, platform=str(self.platform))
+        #This is needed only if bin in folder that not deletes on update!
+        #else: lm.update()
 
         if not self._ensure_binary_executable(binary_path):
             if self.platform.system == "android":
