@@ -246,7 +246,7 @@ class MimeTypes:
                 except EnvironmentError:
                     break
                 try:
-                    ctype = ctype.encode(default_encoding) # omit in 3.x!
+                    ctype = ctype#.encode(default_encoding) # omit in 3.x!
                 except UnicodeEncodeError:
                     pass
                 else:
