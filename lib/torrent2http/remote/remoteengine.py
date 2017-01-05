@@ -1,9 +1,5 @@
-try:
-	import support
-except:
-	pass
-
-from ..engine import Engine
+﻿from ..engine import Engine
+from ..error import Error
 from ..util import ensure_fs_encoding
 
 import filesystem, log
