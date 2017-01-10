@@ -1,2 +1,5 @@
 .idea/
 *.py[cod]
+*.pyproj
+*.suo
+*.exe
