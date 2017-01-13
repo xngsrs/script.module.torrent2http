@@ -16,12 +16,36 @@ s = Settings(None)
 import bottle
 bottle.BaseRequest.MEMFILE_MAX = 1024 * 1024
 
+def _TD_(val):
+	return "<td>" + str(val) + "</td>"
+
+def _TR_(val):
+	return "<tr>" + str(val) + "</tr>"
+
 class HTTP:
 	engines = []
 	
 	def test(self):
 		debug('test')
 		return "<p>Test - Ok</p>"
+
+	def stat(self):
+		page = "<table>"
+		# Head
+
+		page += _TR_(_TD_('#') + _TD_('name') + _TD_('state_str') + _TD_('progress') + _TD_('download_rate') + _TD_('upload_rate') + _TD_('total_download') + _TD_('total_upload') + _TD_('num_peers') + _TD_('num_seeds') + _TD_('total_seeds') + _TD_('total_peers')) 
+
+		N = 1
+		for eng in self.engines:
+			s = eng.status()
+			page += _TR_(_TD_(N) + _TD_(s.name) + _TD_(s.state_str) + _TD_(s.progress) + _TD_(s.download_rate) + _TD_(s.upload_rate) + _TD_(s.total_download) + _TD_(s.total_upload) + _TD_(s.num_peers) + _TD_(s.num_seeds) + _TD_(s.total_seeds) + _TD_(s.total_peers)) 
+
+			N += 1
+
+		page += "</table>"
+
+		return page
+
 		
 	def engine_by(self, pid):
 		return next((engn for engn in self.engines if engn.pid() == pid), None)
@@ -126,6 +150,8 @@ class Server:
 		debug('Running in thread')
 		app = Bottle()
 		app.route('/test', callback=self.http.test)
+		app.route('/stat', callback=self.http.stat)
+
 		
 		app.route('/popen', method='POST', callback=self.http.do_popen)
 		app.route('/can_bind', method='POST', callback=self.http.do_can_bind)
