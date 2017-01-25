@@ -110,21 +110,24 @@ class HTTP:
 
 		#N = 1
 		for eng in self.engines:
-			s = eng.status()
-			pid = eng.pid()
-			page += _TR_(_TD_(pid) 
-				 + _TD_(s.name) 
-				 + _TD_(s.state_str) 
-				 + _TD_(_2percent_(s.progress)) 
-				 + _TD_(_2MBit_s_(s.download_rate))
-				 + _TD_(_2MBit_s_(s.upload_rate)) 
-				 + _TD_(_2MB_(s.total_download)) 
-				 + _TD_(_2MB_(s.total_upload)) 
-				 + _TD_(s.num_peers) 
-				 + _TD_(s.num_seeds) 
-				 + _TD_(s.total_seeds) 
-				 + _TD_(s.total_peers) 
-				 + _TD_(kill(pid))) 
+			try:
+				s = eng.status()
+				pid = eng.pid()
+				page += _TR_(_TD_(pid) 
+					 + _TD_(s.name) 
+					 + _TD_(s.state_str) 
+					 + _TD_(_2percent_(s.progress)) 
+					 + _TD_(_2MBit_s_(s.download_rate))
+					 + _TD_(_2MBit_s_(s.upload_rate)) 
+					 + _TD_(_2MB_(s.total_download)) 
+					 + _TD_(_2MB_(s.total_upload)) 
+					 + _TD_(s.num_peers) 
+					 + _TD_(s.num_seeds) 
+					 + _TD_(s.total_seeds) 
+					 + _TD_(s.total_peers) 
+					 + _TD_(kill(pid))) 
+			except:
+				pass
 
 			#N += 1
 
