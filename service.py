@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import xbmc
+import xbmc, sys
 
 from lib.torrent2http.remote.server import Server
 from lib.torrent2http.remote.log import debug
@@ -18,10 +18,13 @@ def main():
 			if monitor.waitForAbort(1):
 				break
 			server.loop()
+			xbmc.sleep(10)
 			
 	except KeyboardInterrupt:
 		# Exit on ctrl+C
-		pass
+		debug('Exit')
+		server.stop()
+		sys.exit()
 		
 	debug('Exit')
 	server.stop()
