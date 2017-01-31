@@ -12,10 +12,16 @@ def main():
 	server = Server()
 	server.loop()
 	monitor = xbmc.Monitor()
-	while not monitor.abortRequested():
-		if monitor.waitForAbort(1):
-			break
-		server.loop()
+	
+	try:
+		while not monitor.abortRequested():
+			if monitor.waitForAbort(1):
+				break
+			server.loop()
+			
+	except KeyboardInterrupt:
+		# Exit on ctrl+C
+		pass
 		
 	debug('Exit')
 	server.stop()

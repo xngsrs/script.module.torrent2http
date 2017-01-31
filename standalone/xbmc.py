@@ -41,6 +41,10 @@ def log(msg, level=LOGNOTICE):
 	except:
 		pass
 		
+def sleep(t):
+	import time
+	time.sleep(float(t) / 1000)
+		
 # noinspection PyPep8Naming,PyUnusedLocal
 def executeJSONRPC(jsonrpccommand):
 	"""
