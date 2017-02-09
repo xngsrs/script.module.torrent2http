@@ -8,8 +8,9 @@ import json, base64, urllib, os, time
 try:
 	import requests
 except:
-	pass
-
+	import sys, xbmc
+	sys.path.append(os.path.join(xbmc.translatePath("special://home/"),"addons","script.module.requests","lib"))
+	import requests
 
 class RemoteProcess:
 
@@ -52,13 +53,30 @@ class RemoteProcess:
 
 class ClientEngine(Engine):
 
-	def __init__(self, **kwargs):
+	def __init__(self, *args, **kwargs):
 		from remotesettings import Settings
 		self.settings = Settings()
 
 		kwargs['bind_host'] = self.settings.remote_host
 
-		Engine.__init__(self, **kwargs)
+		Engine.__init__(self, *args, **kwargs)
+		
+		arg_names = ['uri', 'binaries_path', 'platform', 'download_path',
+                 'bind_host', 'bind_port', 'connections_limit', 'download_kbps', 'upload_kbps',
+                 'enable_dht', 'enable_lsd', 'enable_natpmp', 'enable_upnp', 'enable_scrape',
+                 'log_stats', 'encryption', 'keep_complete', 'keep_incomplete',
+                 'keep_files', 'log_files_progress', 'log_overall_progress', 'log_pieces_progress',
+                 'listen_port', 'use_random_port', 'max_idle_timeout', 'no_sparse', 'resume_file',
+                 'user_agent', 'startup_timeout', 'state_file', 'enable_utp', 'enable_tcp',
+                 'debug_alerts', 'logger', 'torrent_connect_boost', 'connection_speed',
+                 'peer_connect_timeout', 'request_timeout', 'min_reconnect_time', 'max_failcount',
+                 'dht_routers', 'trackers']
+			
+		i = 0
+		for arg in args:
+			kwargs[arg_names[i]] = arg
+			i += 1
+		
 		self.sobj = ClientEngine.toJSON(kwargs)
 
 	@staticmethod
@@ -155,9 +173,12 @@ class ClientEngine(Engine):
 		fs = Engine.file_status(self, file_index, timeout)
 
 		from torrent2http import FileStatus
-
-		return FileStatus(index=fs.index, name=fs.name, save_path=fs.save_path, url=fs.url.replace('0.0.0.0', self.settings.remote_host),
+		
+		try:
+			return FileStatus(index=fs.index, name=fs.name, save_path=fs.save_path, url=fs.url.replace('0.0.0.0', self.settings.remote_host),
 		                  size=fs.size, offset=fs.offset, download=fs.download, progress=fs.progress, media_type=fs.media_type)
+		except:
+			return None
 
 	def start(self, start_index=None):
 		'''
