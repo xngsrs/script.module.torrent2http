@@ -9,7 +9,7 @@ try:
 	import requests
 except:
 	import sys, xbmc
-	sys.path.append(os.path.join(xbmc.translatePath("special://home/"),"addons","script.module.requests","lib"))
+	sys.path.append(os.path.join(xbmc.translatePath("special://home/addons"), "script.module.requests","lib"))
 	import requests
 
 class RemoteProcess:
