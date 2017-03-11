@@ -58,15 +58,17 @@ class Engine:
         :param binaries_path:
         :return: torrent2http binary path
         """
-        binary = "torrent2http" + (".exe" if self.platform.system == 'windows' else "")
-        binary_dir = os.path.join(binaries_path, "%s_%s" % (self.platform.system, self.platform.arch))
 
+        arch = self.platform.arch
         # Always use 32 bit binary on Windows
         if self.platform.system == 'windows':
-            binary_dir = binary_dir.replace('x64', 'x86')
+            arch = arch.replace('x64', 'x86')
+
+        binary = "torrent2http" + (".exe" if self.platform.system == 'windows' else "")
+        binary_dir = os.path.join(binaries_path, "%s_%s" % (self.platform.system, arch))
 
         binary_path = os.path.join(binary_dir, binary)
-        lm=LibraryManager(binary_dir, "%s_%s" % (self.platform.system, self.platform.arch))
+        lm=LibraryManager(binary_dir, "%s_%s" % (self.platform.system, arch))
         if not os.path.isfile(binary_path):
             success=lm.download()
             if not success:
