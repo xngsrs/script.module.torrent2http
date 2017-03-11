@@ -60,6 +60,11 @@ class Engine:
         """
         binary = "torrent2http" + (".exe" if self.platform.system == 'windows' else "")
         binary_dir = os.path.join(binaries_path, "%s_%s" % (self.platform.system, self.platform.arch))
+
+        # Always use 32 bit binary on Windows
+        if self.platform.system == 'windows':
+            binary_dir = binary_dir.replace('x64', 'x86')
+
         binary_path = os.path.join(binary_dir, binary)
         lm=LibraryManager(binary_dir, "%s_%s" % (self.platform.system, self.platform.arch))
         if not os.path.isfile(binary_path):
