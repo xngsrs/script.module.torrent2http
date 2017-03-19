@@ -7,10 +7,12 @@ import json, base64, urllib, os, time
 
 try:
 	import requests
-except:
+except ImportError:
 	import sys, xbmc
-	sys.path.append(os.path.join(xbmc.translatePath("special://home/"),"addons","script.module.requests","lib"))
-	import requests
+	req_path = os.path.join(xbmc.translatePath("special://home/addons"), "script.module.requests","lib")
+	if os.path.exists(req_path):
+		sys.path.append(req_path)
+		import requests
 
 class RemoteProcess:
 
@@ -50,7 +52,7 @@ class RemoteProcess:
 		log.debug(url)
 		requests.get(url, params={'pid': self.engine.process.pid})
 
-
+		
 class ClientEngine(Engine):
 
 	def __init__(self, *args, **kwargs):
@@ -284,6 +286,7 @@ class ClientEngine(Engine):
 		if url and pid:
 			requests.get(url, params={'pid': pid})
 
+			
 class ServerEngine(Engine):
 	def __init__(self, **kwargs):
 		from remotesettings import Settings
