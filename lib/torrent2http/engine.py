@@ -68,6 +68,7 @@ class Engine:
         binary_dir = os.path.join(binaries_path, "%s_%s" % (self.platform.system, arch))
 
         binary_path = os.path.join(binary_dir, binary)
+        so_path = os.path.join(binary_dir, 'libc++_shared.so')
         lm=LibraryManager(binary_dir, "%s_%s" % (self.platform.system, arch))
         if not os.path.isfile(binary_path):
             success=lm.download()
@@ -76,9 +77,8 @@ class Engine:
                             Error.UNKNOWN_PLATFORM, platform=str(self.platform))
         #This is needed only if bin in folder that not deletes on update!
         #else: lm.update()
-
-        if not self._ensure_binary_executable(binary_path):
-            if self.platform.system == "android":
+        if self.platform.system == "android":
+            if not self._ensure_binary_executable(binary_path) or not self._ensure_binary_executable(so_path):
                 self._log("Trying to copy torrent2http to ext4, since the sdcard is noexec...")
                 xbmc_home = os.environ.get('XBMC_HOME') or os.environ.get('KODI_HOME')
                 if not xbmc_home:
@@ -89,16 +89,26 @@ class Engine:
                 if not os.path.exists(android_binary_dir):
                     os.makedirs(android_binary_dir)
                 android_binary_path = os.path.join(android_binary_dir, binary)
-                if not os.path.exists(android_binary_path) or \
+                android_so_path = os.path.join(android_binary_dir, 'libc++_shared.so')
+                if not os.path.exists(android_binary_path) or not os.path.exists(android_so_path) or \
                         int(os.path.getmtime(android_binary_path)) < int(os.path.getmtime(binary_path)):
                     import shutil
                     shutil.copy2(binary_path, android_binary_path)
+                    shutil.copy2(so_path, android_so_path)
                     if not self._ensure_binary_executable(android_binary_path):
                         raise Error("Can't make %s executable" % android_binary_path, Error.NOEXEC_FILESYSTEM)
+                    if not self._ensure_binary_executable(android_so_path):
+                        raise Error("Can't make %s executable" % android_so_path, Error.NOEXEC_FILESYSTEM)
+                    self._log("so_path is  %s" % android_so_path)
+                    self._log("binary_dir is %s" % binary_dir)
                 binary_path = android_binary_path
             else:
                 raise Error("Can't make %s executable, ensure it's placed on exec partition and "
                             "partition is in read/write mode" % binary_path, Error.NOEXEC_FILESYSTEM)
+
+        try: self._ensure_binary_executable(binary_path)
+        except BaseException as e:
+            raise Error(e)
         self._log("Selected %s as torrent2http binary" % binary_path)
         return binary_path
 
@@ -308,10 +318,13 @@ class Engine:
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= 1
             startupinfo.wShowWindow = 0
+        else:
+			env = os.environ.copy()
+			env["LD_LIBRARY_PATH"] = "%s:%s" % (binary_path.replace('torrent2http', ''), env.get("LD_LIBRARY_PATH", ""))
 
         self.logpipe = logpipe.LogPipe(self._log)
         try:
-            self.process = subprocess.Popen(args, stderr=self.logpipe, stdout=self.logpipe, startupinfo=startupinfo)
+            self.process = subprocess.Popen(args, stderr=self.logpipe, stdout=self.logpipe, startupinfo=startupinfo, env=env, close_fds=True)
         except OSError, e:
             raise Error("Can't start torrent2http: %r" % e, Error.POPEN_ERROR)
 

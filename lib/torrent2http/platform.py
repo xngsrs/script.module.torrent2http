@@ -17,12 +17,14 @@ class Platform:
     def arch():
         if sys.platform.lower().startswith('linux') and (uname()[4].lower().startswith('arm') or
                                                          uname()[4].lower().startswith('aarch')):
-            if 'ANDROID_DATA' not in os.environ:
-                if uname()[4].lower().startswith('armv6'):
-                    return "armv6"
-                elif uname()[4].lower().startswith('aarch64') and sys.maxsize > 2 ** 32:
-                    return "aarch64"
-            return 'arm'
+            if uname()[4].lower().startswith('armv6'):
+                return "armv6"
+            elif uname()[4].lower().startswith('aarch64') and sys.maxsize > 2 ** 32:
+                return "aarch64"
+            elif uname()[4].lower().startswith('armv7'):
+                return "armv7"
+            else:
+                return 'arm'
         elif sys.maxsize > 2**32:
             return 'x64'
         else:
