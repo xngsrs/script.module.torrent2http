@@ -318,6 +318,7 @@ class Engine:
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= 1
             startupinfo.wShowWindow = 0
+            env = os.environ.copy()
         else:
 			env = os.environ.copy()
 			env["LD_LIBRARY_PATH"] = "%s:%s" % (binary_path.replace('torrent2http', ''), env.get("LD_LIBRARY_PATH", ""))
