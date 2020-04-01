@@ -314,20 +314,22 @@ class Engine:
 
         self._log("Invoking %s" % " ".join(args))
         startupinfo = None
+        self.logpipe = logpipe.LogPipe(self._log)
         if self.platform.system == "windows":
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= 1
             startupinfo.wShowWindow = 0
-            env = os.environ.copy()
+            try:
+                self.process = subprocess.Popen(args, stderr=self.logpipe, stdout=self.logpipe, startupinfo=startupinfo)
+            except OSError, e:
+                raise Error("Can't start torrent2http: %r" % e, Error.POPEN_ERROR)
         else:
-			env = os.environ.copy()
-			env["LD_LIBRARY_PATH"] = "%s:%s" % (binary_path.replace('torrent2http', ''), env.get("LD_LIBRARY_PATH", ""))
-
-        self.logpipe = logpipe.LogPipe(self._log)
-        try:
-            self.process = subprocess.Popen(args, stderr=self.logpipe, stdout=self.logpipe, startupinfo=startupinfo, env=env, close_fds=True)
-        except OSError, e:
-            raise Error("Can't start torrent2http: %r" % e, Error.POPEN_ERROR)
+            env = os.environ.copy()
+            env["LD_LIBRARY_PATH"] = "%s:%s" % (binary_path.replace('torrent2http', ''), env.get("LD_LIBRARY_PATH", ""))
+            try:
+                self.process = subprocess.Popen(args, stderr=self.logpipe, stdout=self.logpipe, startupinfo=startupinfo, env=env, close_fds=True)
+            except OSError, e:
+                raise Error("Can't start torrent2http: %r" % e, Error.POPEN_ERROR)
 
         start = time.time()
         self.started = True
