@@ -19,7 +19,7 @@ class Platform:
                                                          uname()[4].lower().startswith('aarch')):
             if uname()[4].lower().startswith('armv6'):
                 return "armv6"
-            elif uname()[4].lower().startswith('aarch64') and sys.maxsize > 2 ** 32:
+            elif uname()[4].lower().startswith('aarch64'):
                 return "aarch64"
             elif uname()[4].lower().startswith('armv7'):
                 return "armv7"
