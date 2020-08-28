@@ -20,7 +20,7 @@ def mkdir(path):
 		os.mkdir(encode_fs(path))
 		return True
 	except BaseException as e:
-		print e
+		print(e)
 		raise AssertionError("Can't makedirs %s", path)
 		return False
 
@@ -44,7 +44,7 @@ def mkdirs(path):
 		os.makedirs(encode_fs(path))
 		return True
 	except BaseException as e:
-		print e
+		print(e)
 		raise AssertionError("Can't makedirs %s", path)
 		return False
 
@@ -73,6 +73,6 @@ def delete(file):
 		os.remove(encode_fs(file))
 		return True
 	except:
-		print "Can't remove %s" % file
+		print("Can't remove %s" % file)
 		return False
 		

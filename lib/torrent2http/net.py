@@ -3,8 +3,12 @@
 import os
 import time
 import re
-import urllib
-import urllib2
+try: 
+    import urllib
+    import urllib2
+except ImportError:
+    import urllib.parse as urllib
+    import urllib.request as urllib2
 import cookielib
 import base64
 import mimetools

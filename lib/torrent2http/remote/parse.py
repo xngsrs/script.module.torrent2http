@@ -1,8 +1,17 @@
-import sys, json, base64, os
-import urlparse, urllib
+import sys
+import json
+import base64
+import os
+try:
+    from urlparse import urljoin
+    from urllib import pathname2url
+except:
+    from urllib.parse import urljoin
+    from urllib.request import pathname2url
+    import urllib.parse as urllib
 
 def path2url(path):
-	return urlparse.urljoin('file:', urllib.pathname2url(path))
+	return urljoin('file:', pathname2url(path))
 
 
 def remote_t2h_torrent_path():
@@ -26,7 +35,7 @@ def parse(argv, s):
 		if i.startswith('dict='):
 			data = base64.b64decode(i[5:])
 			data = json.loads(data)
-			print data
+			print(data)
 
 	# import rpdb2
 	# rpdb2.start_embedded_debugger('pw')
@@ -73,11 +82,11 @@ def parse(argv, s):
 		if bind_port:
 			data['bind_port'] = bind_port
 
-		from remoteengine import ServerEngine
+		from .remoteengine import ServerEngine
 		e = ServerEngine(**data)
 		e.start(start_index=start_index)
 
-		print e
+		print(e)
 		
 		return e
 		

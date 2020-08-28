@@ -39,17 +39,17 @@ FileStatus = namedtuple('FileStatus', "name, save_path, url, size, offset, downl
 PeerInfo = namedtuple('PeerInfo', "ip, flags, source, up_speed, down_speed, total_upload, total_download, "
                                   "country, client")
 
-from remote.remotesettings import *
+from .remote.remotesettings import *
 
 s = Settings()
 
 try:
 	if s.role == 'client':
-		from remote.remoteengine import ClientEngine as Engine
+		from .remote.remoteengine import ClientEngine as Engine
 	else:
-		from engine import Engine
+		from .engine import Engine
 except:
-	from engine import Engine
+	from .engine import Engine
 
-from platform import Platform
-from error import Error
+from .platform import Platform
+from .error import Error

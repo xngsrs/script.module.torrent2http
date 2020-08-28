@@ -37,7 +37,7 @@ def translatePath(path):
 	
 def log(msg, level=LOGNOTICE):
 	try:
-		print msg
+		print(msg)
 	except:
 		pass
 		
@@ -80,7 +80,7 @@ def executebuiltin(function, block=False):
 			zip_ref.extractall(dst)
 			zip_ref.close()
 		except BaseException as e:
-			print e
+			print(e)
 			raise
 
 	pass

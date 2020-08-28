@@ -31,21 +31,21 @@ class Public:
                 system=platform+'/'
                 if os.path.exists(self.libpath):
                     if not os.path.exists(self.sizepath):
-                        print system+self.libname+' NO SIZE'
+                        print(system+self.libname+' NO SIZE')
                         self._makezip()
                     elif not os.path.exists(zippath):
-                        print system+self.libname+' NO ZIP'
+                        print(system+self.libname+' NO ZIP')
                         self._makezip()
                     else:
                         size=str(os.path.getsize(self.libpath))
                         size_old=open( self.sizepath, "r" ).read()
                         if size_old!=size:
-                            print system+self.libname+' NOT EQUAL'
+                            print(system+self.libname+' NOT EQUAL')
                             self._makezip()
                         else:
-                            print system+self.libname+' NO ACTION'
+                            print(system+self.libname+' NO ACTION')
                 else:
-                    print system+self.libname+' NO LIB'
+                    print(system+self.libname+' NO LIB')
 
     def _makezip(self):
         open( self.sizepath, "w" ).write( str(os.path.getsize(self.libpath)) )

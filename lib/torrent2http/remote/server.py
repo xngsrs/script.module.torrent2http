@@ -3,14 +3,14 @@
 import threading
 from wsgiref.simple_server import make_server, WSGIRequestHandler
 
-from bottle import Bottle, ServerAdapter, response, redirect, abort
-from bottle import request #get, request, run, route # or route
+from .bottle import Bottle, ServerAdapter, response, redirect, abort
+from .bottle import request #get, request, run, route # or route
 
 import sys, xbmc, os
-from log import debug, print_tb
+from .log import debug, print_tb
 
-from parse import parse
-from remotesettings import Settings
+from .parse import parse
+from .remotesettings import Settings
 s = Settings(None)
 
 import bottle

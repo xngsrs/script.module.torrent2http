@@ -1,3 +1,8 @@
+[B]Version 0.3.2[/B]
++ Ready for kodi 19
++ Fixes for server/client
+
+
 [B]Version 0.2.1[/B]
 + WebUI (http://<host>:<port>/stat) by -=Vd=-
 

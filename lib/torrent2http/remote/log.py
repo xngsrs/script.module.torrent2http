@@ -2,7 +2,7 @@ try:
 	from xbmc import log
 except:
 	def log(s):
-		print s
+		print(s)
 
 import inspect
 
