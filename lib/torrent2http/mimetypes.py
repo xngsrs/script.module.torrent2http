@@ -609,7 +609,7 @@ More than one type argument may be given.
     for gtype in args:
         if extension:
             guess = guess_extension(gtype, strict)
-            if not guess: print "I don't know anything about type", gtype
+            if not guess: print("I don't know anything about type", gtype)
             else: print(guess)
         else:
             guess, encoding = guess_type(gtype, strict)

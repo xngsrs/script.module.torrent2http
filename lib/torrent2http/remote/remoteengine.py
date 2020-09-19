@@ -1,14 +1,15 @@
-﻿from ..engine import Engine
+﻿# -*- coding: utf-8 -*-
+from ..engine import Engine
 from ..error import Error
 from ..util import ensure_fs_encoding
 
-import filesystem, log
+from . import filesystem, log
 import json
 import base64
 try: 
-    from urllib import pathname2url
+    from urllib import url2pathname
 except:
-    from urllib.request import pathname2url
+    from urllib.request import url2pathname
 import os
 import time
 
@@ -112,9 +113,11 @@ class ClientEngine(Engine):
             tdata = base64.b64encode(tdata)
 
         args_str = json.dumps(args[1:])
-        args_str = base64.b64encode(args_str)
+        try: args_str = base64.b64encode(args_str)
+        except: args_str = base64.b64encode(args_str.encode('utf-8'))
         dict_str = self.sobj
-        dict_str = base64.b64encode(dict_str)
+        try: dict_str = base64.b64encode(dict_str)
+        except:  dict_str = base64.b64encode(dict_str.encode('utf-8'))
 
 
         params = {"addonid":"script.module.torrent2http.remote", "params": {"args": args_str, 'torrent_data': tdata, "dict": dict_str }}
@@ -241,7 +244,9 @@ class ClientEngine(Engine):
         }
 
         args = []
-        for k, v in kwargs.iteritems():
+        try: kwiters = kwargs.iteritems()
+        except: kwiters = kwargs.items()
+        for k, v in kwiters:
             if v is not None:
                 if isinstance(v, bool):
                     if v:
@@ -250,9 +255,12 @@ class ClientEngine(Engine):
                         args.append("%s=false" % k)
                 else:
                     args.append(k)
-                    if isinstance(v, str) or isinstance(v, unicode):
-                        v = ensure_fs_encoding(v)
-                    else:
+                    try:
+                        if isinstance(v, str) or isinstance(v, unicode):
+                            v = ensure_fs_encoding(v)
+                        else:
+                            v = str(v)
+                    except:
                         v = str(v)
                     args.append(v)
 

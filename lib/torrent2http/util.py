@@ -37,8 +37,10 @@ def find_free_port(host):
 
 
 def ensure_fs_encoding(string,encoding='utf-8'):
-    if isinstance(string, unicode):
-        string = string.encode(encoding)
+    try: 
+        if isinstance(string, unicode):
+            string = string.encode(encoding)
+    except: pass
     if not isinstance(string, str):
         string = str(string)
     return string

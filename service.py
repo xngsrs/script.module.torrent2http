@@ -33,5 +33,5 @@ if __name__ == '__main__':
 	from lib.torrent2http.remote.remotesettings import Settings
 	s = Settings(None)
 
-	if s.role == 'server':
+	if s.role == 'server' or s.mrsprole:
 		main()

@@ -48,6 +48,7 @@ class LibraryManager():
             self.download()
 
     def download(self):
+        from . import patoolib
         xbmcvfs.mkdirs(self.dest_path)
         for libname in get_libname(self.platform):
             dest = os.path.join(self.dest_path, libname)
@@ -57,9 +58,12 @@ class LibraryManager():
                 self.http = HTTP()
                 self.http.fetch(url, download=dest + ".zip", progress=True)
                 log("%s -> %s" % (url, dest))
-                xbmc.executebuiltin('XBMC.Extract("%s.zip","%s")' % (dest, self.dest_path), True)
+                #xbmc.sleep(500)
+                patoolib.extract_archive('%s.zip' % dest, outdir=self.dest_path)
+                #xbmc.executebuiltin('XBMC.Extract("%s.zip")' % (dest), True)
                 xbmcvfs.delete(dest + ".zip")
-            except:
+            except BaseException as e:
+                log(e)
                 text = 'Failed download %s!' % libname
                 xbmc.executebuiltin("XBMC.Notification(%s,%s,%s)" % (__plugin__,text,750))
         return True

@@ -44,12 +44,16 @@ from .remote.remotesettings import *
 s = Settings()
 
 try:
-	if s.role == 'client':
-		from .remote.remoteengine import ClientEngine as Engine
-	else:
-		from .engine import Engine
+    
+    if s.mrsprole:
+        from .remote.remoteengine import ClientEngine as Engine
+    else:
+        if s.role == 'client':
+            from .remote.remoteengine import ClientEngine as Engine
+        else:
+            from .engine import Engine
 except:
-	from .engine import Engine
+    from .engine import Engine
 
 from .platform import Platform
 from .error import Error

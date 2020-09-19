@@ -5,16 +5,28 @@ import socket
 import stat
 import subprocess
 import sys
+try:
+    reload
+except NameError:
+    try:
+        from importlib import reload
+    except ImportError:
+        from imp import reload
+try:
+    reload(sys)
+    sys.setdefaultencoding('UTF8')
+except: pass
 import time
 try:
     import urllib2
 except ImportError: 
     import urllib.request as urllib2
-import httplib
+try: import httplib
+except: import http.client as httplib
 from os.path import dirname
 from .download import LibraryManager
 
-import logpipe
+#import logpipe
 import mimetypes
 import xbmc
 from .error import Error
@@ -52,7 +64,10 @@ class Engine:
         if self.logger:
             self.logger(message)
         else:
-            xbmc.log("[torrent2http] %s" % message)
+            try:
+                xbmc.log("[torrent2http] %s" % message )
+            except UnicodeEncodeError:
+                xbmc.log("[torrent2http] %s" % message.encode("utf-8", "ignore") )
 
     def _get_binary_path(self, binaries_path):
         """
@@ -300,7 +315,9 @@ class Engine:
         }
 
         args = [binary_path]
-        for k, v in kwargs.iteritems():
+        try: kwiter = kwargs.iteritems()
+        except: kwiter = kwargs.items()
+        for k, v in kwiter:
             if v is not None:
                 if isinstance(v, bool):
                     if v:
@@ -309,28 +326,30 @@ class Engine:
                         args.append("%s=false" % k)
                 else:
                     args.append(k)
-                    if isinstance(v, str) or isinstance(v, unicode):
-                        v = ensure_fs_encoding(v)
-                    else:
+                    if isinstance(v, int):
                         v = str(v)
+                    else: 
+                        try:
+                            v = str(v.encode('utf-8').decode('utf-8'))
+                        except:
+                            pass
                     args.append(v)
 
-        self._log("Invoking %s" % " ".join(args))
+        self._log("Invoking %s" % repr(args))
         startupinfo = None
-        self.logpipe = logpipe.LogPipe(self._log)
         if self.platform.system == "windows":
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= 1
             startupinfo.wShowWindow = 0
             try:
-                self.process = subprocess.Popen(args, stderr=self.logpipe, stdout=self.logpipe, startupinfo=startupinfo)
+                self.process = subprocess.Popen(args, startupinfo=startupinfo)
             except OSError as e:
                 raise Error("Can't start torrent2http: %r" % e, Error.POPEN_ERROR)
         else:
             env = os.environ.copy()
             env["LD_LIBRARY_PATH"] = "%s:%s" % (binary_path.replace('torrent2http', ''), env.get("LD_LIBRARY_PATH", ""))
             try:
-                self.process = subprocess.Popen(args, stderr=self.logpipe, stdout=self.logpipe, startupinfo=startupinfo, env=env, close_fds=True)
+                self.process = subprocess.Popen(args, startupinfo=startupinfo, env=env, close_fds=True)
             except OSError as e:
                 raise Error("Can't start torrent2http: %r" % e, Error.POPEN_ERROR)
 
@@ -488,16 +507,12 @@ class Engine:
         Shuts down torrent2http and stops logging. If wait_on_close() was called earlier, it will wait until
         torrent2http successfully exits.
         """
-        if self.logpipe and self.wait_on_close_timeout is None:
-            self.logpipe.close()
         if self.is_alive():
             self._log("Shutting down torrent2http...")
             self._request('shutdown')
             finished = False
             if self.wait_on_close_timeout is not None:
                 start = time.time()
-                try: os.close(self.logpipe.write_fd)
-                except: pass
                 while (time.time() - start) < self.wait_on_close_timeout:
                     time.sleep(0.5)
                     if not self.is_alive():
@@ -511,5 +526,4 @@ class Engine:
                 self.wait_on_close_timeout = None
             self.process.wait()
         self.started = False
-        self.logpipe = None
         self.process = None

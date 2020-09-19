@@ -1,6 +1,7 @@
 ﻿# -*- coding: utf-8 -*-
 
-import os, sys, log
+import os, sys
+from . import log
 
 __DEBUG__ = False
 
@@ -15,7 +16,8 @@ def get_filesystem_encoding():
 
 def ensure_unicode(string, encoding=get_filesystem_encoding()):
     if isinstance(string, str):
-        string = string.decode(encoding)
+        try: string = string.decode(encoding)
+        except: pass
     if __DEBUG__:
         log.debug('\tensure_unicode(%s, encoding=%s)' % (string.encode('utf-8'), encoding))
 
@@ -24,6 +26,7 @@ def ensure_unicode(string, encoding=get_filesystem_encoding()):
 
 def get_path(path):
     errors='strict'
+    path = str(path)
     if path.startswith('smb://') and os.name == 'nt':
         path = path.replace('smb://', r'\\').replace('/', '\\')
 
