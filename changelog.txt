@@ -1,3 +1,9 @@
+[B]Version 0.4.0[/B]
++ More fixes for kodi 19
++ added tuned storage config
++ added options for stop torrent, resume torrent and change file priorities
++ added binaries for most OS-es
+
 [B]Version 0.3.2[/B]
 + Ready for kodi 19
 + Fixes for server/client

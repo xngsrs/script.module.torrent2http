@@ -110,3 +110,5 @@ with closing(engine):
 
 You can look into fully working [example](https://github.com/anteo/plugin.video.okino/blob/master/resources/lib/okino/torrent/stream/t2h_stream.py). This is
 excerpt from my plugin using script.module.torrent2http. It rather complicated but it includes error handling, showing progress dialog and other features.
+
+Added more commands for stop, resume and set file priority, and for tuned storage

@@ -80,7 +80,7 @@ class ClientEngine(Engine):
                 'user_agent', 'startup_timeout', 'state_file', 'enable_utp', 'enable_tcp',
                 'debug_alerts', 'logger', 'torrent_connect_boost', 'connection_speed',
                 'peer_connect_timeout', 'request_timeout', 'min_reconnect_time', 'max_failcount',
-                'dht_routers', 'trackers']
+                'dht_routers', 'trackers', 'tuned_storage']
             
         i = 0
         for arg in args:
@@ -241,6 +241,7 @@ class ClientEngine(Engine):
             '--max-failcount': self.max_failcount,
             '--dht-routers': ",".join(self.dht_routers),
             '--trackers': ",".join(self.trackers),
+            '--tuned-storage': self.tuned_storage,
         }
 
         args = []

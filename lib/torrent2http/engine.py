@@ -137,9 +137,9 @@ class Engine:
                  keep_files=False, log_files_progress=False, log_overall_progress=False, log_pieces_progress=False,
                  listen_port=6881, use_random_port=False, max_idle_timeout=None, no_sparse=False, resume_file=None,
                  user_agent=None, startup_timeout=5, state_file=None, enable_utp=True, enable_tcp=True,
-                 debug_alerts=False, logger=None, torrent_connect_boost=50, connection_speed=50,
+                 debug_alerts=False, logger=None, torrent_connect_boost=50, connection_speed=200,
                  peer_connect_timeout=15, request_timeout=20, min_reconnect_time=60, max_failcount=3,
-                 dht_routers=None, trackers=None):
+                 dht_routers=None, trackers=None, tuned_storage=False):
         """
         Creates engine instance. It doesn't do anything except initializing object members. For starting engine use
         start() method.
@@ -188,6 +188,7 @@ class Engine:
         :param max_failcount: The maximum times we try to connect to a peer before stop connecting again
         :param dht_routers: List of additional DHT routers (host:port pairs)
         :param trackers: List of additional tracker URLs
+        :param tuned_storage: Enable storage optimizations for Android external storage / OS-mounted NAS setups
         """
         self.dht_routers = dht_routers or []
         self.trackers = trackers or []
@@ -229,6 +230,7 @@ class Engine:
         self.wait_on_close_timeout = None
         self.enable_utp = enable_utp
         self.enable_tcp = enable_tcp
+        self.tuned_storage = tuned_storage
         self.debug_alerts = debug_alerts
         self.logger = logger
         self.uri = uri
@@ -312,6 +314,7 @@ class Engine:
             '--max-failcount': self.max_failcount,
             '--dht-routers': ",".join(self.dht_routers),
             '--trackers': ",".join(self.trackers),
+            '--tuned-storage': self.tuned_storage,
         }
 
         args = [binary_path]
@@ -527,3 +530,15 @@ class Engine:
             self.process.wait()
         self.started = False
         self.process = None
+
+    def stop(self):
+        self._log("stoping torrent")
+        self._request('stop')
+    
+    def resume(self):
+        self._log('resuming torrent')
+        self._request('resume')
+
+    def priority(self, index, priority):
+        self._request('priority?index=%s&priority=%s' % (index, priority))
+            
