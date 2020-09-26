@@ -7,7 +7,7 @@ from .bottle import Bottle, ServerAdapter, response, redirect, abort
 from .bottle import request #get, request, run, route # or route
 
 import sys, xbmc, os
-from .log import debug, print_tb
+from .log import debug, print_tb, logs
 
 from .parse import parse
 from .remotesettings import Settings
@@ -24,6 +24,18 @@ function close_procces(pid) {
     var x = new XMLHttpRequest();
 
     x.open("GET", "/close_me?pid=" + pid, true);
+    x.send(null);
+}
+function stop_procces(pid) {
+    var x = new XMLHttpRequest();
+
+    x.open("GET", "/stop_me?pid=" + pid, true);
+    x.send(null);
+}
+function resume_procces(pid) {
+    var x = new XMLHttpRequest();
+
+    x.open("GET", "/resume_me?pid=" + pid, true);
     x.send(null);
 }
 '''
@@ -55,6 +67,12 @@ def statgui():
 
 def kill(pid):
     return '<a href="javascript:void(0)" onclick="close_procces(%d); return false;">Kill!</a>' % pid
+
+def pstop(pid):
+    return '<a href="javascript:void(0)" onclick="stop_procces(%d); return false;">Stop!</a>' % pid
+
+def presume(pid):
+    return '<a href="javascript:void(0)" onclick="resume_procces(%d); return false;">Resume</a>' % pid
 
 def _HEAD_():
     res = '<head>'
@@ -107,8 +125,14 @@ class HTTP:
             + _TH_('peers') 
             + _TH_('seeds') 
             + _TH_('total_seeds') 
-            + _TH_('total_peers') 
-            + _TH_('action')) 
+            + _TH_('total_peers')
+            + _TH_('hash_string')
+            + _TH_('session_status')
+            + _TH_('host')
+            + _TH_('port') 
+            + _TH_('action')
+            + _TH_('action2')
+            + _TH_('action3'))
 
         #N = 1
         for eng in self.engines:
@@ -126,8 +150,14 @@ class HTTP:
                     + _TD_(s.num_peers) 
                     + _TD_(s.num_seeds) 
                     + _TD_(s.total_seeds) 
-                    + _TD_(s.total_peers) 
-                    + _TD_(kill(pid))) 
+                    + _TD_(s.total_peers)
+                    + _TD_(s.hash_string)
+                    + _TD_(s.session_status)
+                    + _TD_(eng.bind_host)
+                    + _TD_(eng.bind_port)
+                    + _TD_(kill(pid))
+                    + _TD_(pstop(pid))
+                    + _TD_(presume(pid))) 
             except:
                 pass
 
@@ -154,7 +184,10 @@ class HTTP:
                              "num_peers": s.num_peers, 
                              "num_seeds": s.num_seeds, 
                              "total_seeds": s.total_seeds, 
-                             "total_peers": s.total_peers})
+                             "total_peers": s.total_peers,
+                             "hash_string": s.hash_string,
+                             "bind_host": eng.bind_host,
+                             "bind_port": eng.bind_port})
             except:
                 pass
         return dict(data=data)
@@ -194,7 +227,8 @@ class HTTP:
             + _TH_('download') 
             + _TH_('progress') 
             + _TH_('index') 
-            + _TH_('media type')) 
+            + _TH_('media type')
+            + _TH_('priority')) 
         try:
             t = next((engn for engn in self.engines if engn.pid() == int(request.params.get('pid'))), None)
             s = t.list()
@@ -209,7 +243,8 @@ class HTTP:
                     + _TD_(fb.download)
                     + _TD_(fb.progress)
                     + _TD_(fb.index)
-                    + _TD_(fb.media_type))
+                    + _TD_(fb.media_type)
+                    + _TD_(fb.priority))
         except:
             pass
         page += "</table></body></html>"
@@ -238,6 +273,7 @@ class HTTP:
                     'dict=' + dict_str]
 
             engn = parse(argv, s)
+            logs(engn)
             self.engines.append(engn) 
 
             return str(engn.pid()) + '.' + str(engn.bind_port)
@@ -251,9 +287,18 @@ class HTTP:
 
     def close_me(self):
         engn = self.engine()
-        engn.process.terminate()
+        #engn.process.terminate()
+        engn.wait_on_close(1)
         engn.close()
         self.engines.remove(engn)
+        
+    def stop_me(self):
+        engn = self.engine()
+        engn.stop()
+        
+    def resume_me(self):
+        engn = self.engine()
+        engn.resume()
         
     def poll(self):
         try:
@@ -345,16 +390,22 @@ class Server:
                     enable_lsd = s.mrgetset('enable_lsd') == 'true'
                     enable_upnp = s.mrgetset('enable_upnp') == 'true'
                     enable_natpmp = s.mrgetset('enable_natpmp') == 'true'
+                    enable_utp = s.mrgetset('enable_utp') == 'true'
+                    enable_tcp = s.mrgetset('enable_tcp') == 'true'
+                    enable_scrape = s.mrgetset('enable_scrape') == 'true'
                     no_sparse = s.mrgetset('no_sparse') == 'true'
                     dht_routers = ["router.bittorrent.com:6881","router.utorrent.com:6881"]
-                    user_agent = 'Transmission/2.12 (234)'
-                    pre_buffer_bytes = int(s.mrgetset('pre_buffer_bytes'))*1024*1024
+                    tuned_storage = s.mrgetset('tuned_storage') == 'true'
+                    connection_speed = int(s.mrgetset('connection_speed')) if s.mrgetset('connection_speed') else 100
+                    user_agent = ''#'Transmission/2.12 (234)'
                     engine = Engine(uri=filet, download_path=s.mrgetset('storage'),
-                                    connections_limit=connections_limit, download_kbps=download_limit, upload_kbps=upload_limit,
-                                    encryption=encryption, keep_complete=keep_complete, keep_incomplete=keep_incomplete,
-                                    dht_routers=dht_routers, use_random_port=use_random_port, listen_port=listen_port,
-                                    keep_files=keep_files, user_agent=user_agent, resume_file=resume_file, enable_dht=enable_dht,
-                                    enable_lsd=enable_lsd, enable_upnp=enable_upnp, enable_natpmp=enable_natpmp, no_sparse=no_sparse)
+                                        connections_limit=connections_limit, download_kbps=download_limit, upload_kbps=upload_limit,
+                                        encryption=encryption, keep_complete=keep_complete, keep_incomplete=keep_incomplete,
+                                        connection_speed=connection_speed, tuned_storage=tuned_storage,
+                                        dht_routers=dht_routers, use_random_port=use_random_port, listen_port=listen_port,
+                                        keep_files=keep_files, user_agent=user_agent, resume_file=resume_file, enable_dht=enable_dht,
+                                        enable_lsd=enable_lsd, enable_upnp=enable_upnp, enable_natpmp=enable_natpmp,
+                                        no_sparse=no_sparse, enable_utp=enable_utp, enable_scrape=enable_scrape, enable_tcp=enable_tcp)
                     engine.start()
 
     def _run(self):
@@ -376,6 +427,8 @@ class Server:
 
         app.route('/close', callback=self.http.close)
         app.route('/close_me', callback=self.http.close_me)
+        app.route('/stop_me', callback=self.http.stop_me)
+        app.route('/resume_me', callback=self.http.resume_me)
         app.route('/status', callback=self.http.status)
         app.route('/status/json', callback=self.http.statusjson)
 
@@ -390,6 +443,10 @@ class Server:
         self.server = None
 
     def stop(self):
+        if self.http.engines:
+            for eng in self.http.engines:
+                eng.wait_on_close(1)
+                eng.close()
         if self.server:
             self.server.stop()
             while self.server:

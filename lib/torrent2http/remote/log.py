@@ -3,6 +3,8 @@ try:
 except:
     def log(s):
         print(s)
+        
+import xbmc
 
 import inspect
 
@@ -49,3 +51,11 @@ def print_tb(e=None):
 def lineno():
     """Returns the current line number in our program."""
     return inspect.currentframe().f_back.f_lineno
+
+def logs(msg):
+    try:
+        xbmc.log("### [%s]: %s" % ('engine',msg,), level=xbmc.LOGDEBUG )
+    except UnicodeEncodeError:
+        xbmc.log("### [%s]: %s" % ('engine',msg.encode("utf-8", "ignore"),), level=xbmc.LOGDEBUG )
+    except:
+        xbmc.log("### [%s]: %s" % ('engine','ERROR LOG',), level=xbmc.LOGDEBUG )

@@ -58,9 +58,11 @@ class LibraryManager():
                 self.http = HTTP()
                 self.http.fetch(url, download=dest + ".zip", progress=True)
                 log("%s -> %s" % (url, dest))
-                #xbmc.sleep(500)
-                patoolib.extract_archive('%s.zip' % dest, outdir=self.dest_path)
-                #xbmc.executebuiltin('XBMC.Extract("%s.zip")' % (dest), True)
+                xbmc.sleep(500)
+                try:
+                    patoolib.extract_archive('%s.zip' % dest, outdir=self.dest_path)
+                except:
+                    xbmc.executebuiltin('XBMC.Extract("%s.zip")' % (dest), True)
                 xbmcvfs.delete(dest + ".zip")
             except BaseException as e:
                 log(e)

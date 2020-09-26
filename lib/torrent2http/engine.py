@@ -65,9 +65,9 @@ class Engine:
             self.logger(message)
         else:
             try:
-                xbmc.log("[torrent2http] %s" % message )
+                xbmc.log("[torrent2http] %s" % message, xbmc.LOGDEBUG)
             except UnicodeEncodeError:
-                xbmc.log("[torrent2http] %s" % message.encode("utf-8", "ignore") )
+                xbmc.log("[torrent2http] %s" % message.encode("utf-8", "ignore"), xbmc.LOGDEBUG )
 
     def _get_binary_path(self, binaries_path):
         """
@@ -541,4 +541,13 @@ class Engine:
 
     def priority(self, index, priority):
         self._request('priority?index=%s&priority=%s' % (index, priority))
+
+    def stopanddelete(self):
+        import xbmcvfs
+        self._log('stoping and remove files')
+        self._request('stopanddelete')
+        if self.state_file:
+            xbmcvfs.delete(self.state_file)
+        if self.resume_file:
+            xbmcvfs.delete(self.resume_file)
             

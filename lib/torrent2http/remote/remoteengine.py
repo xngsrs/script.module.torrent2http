@@ -29,7 +29,6 @@ class RemoteProcess:
 
     def poll(self):
         url = "http://%s:%d/poll" % (self.engine.settings.remote_host, self.engine.settings.remote_port)
-        log.debug(url)
         r = requests.get(url, params={'pid': self.engine.process.pid})
         
         if r.status_code == requests.codes.ok:
@@ -42,7 +41,6 @@ class RemoteProcess:
 
     def wait(self, timeout=None):
         url = "http://%s:%d/wait" % (self.engine.settings.remote_host, self.engine.settings.remote_port)
-        log.debug(url)
         r = requests.get(url, params={'pid': self.engine.process.pid})
         
         if r.status_code == requests.codes.ok:
@@ -52,12 +50,10 @@ class RemoteProcess:
 
     def terminate(self):
         url = "http://%s:%d/terminate" % (self.engine.settings.remote_host, self.engine.settings.remote_port)
-        log.debug(url)
         requests.get(url, params={'pid': self.engine.process.pid})
 
     def kill(self):
         url = "http://%s:%d/kill" % (self.engine.settings.remote_host, self.engine.settings.remote_port)
-        log.debug(url)
         requests.get(url, params={'pid': self.engine.process.pid})
 
         
@@ -103,7 +99,7 @@ class ClientEngine(Engine):
 
     def MyPopen(self, args, **kwargs):
         for i in args[1:]:
-            print(i)
+            log.debug(i)
 
         o = {"jsonrpc": "2.0", "method": "Addons.ExecuteAddon", "id": "2"}
 
@@ -123,7 +119,7 @@ class ClientEngine(Engine):
         params = {"addonid":"script.module.torrent2http.remote", "params": {"args": args_str, 'torrent_data': tdata, "dict": dict_str }}
         o['params'] = params
 
-        print(o)
+        log.debug(o)
 
         url = "http://%s:%d/popen" % (self.settings.remote_host, self.settings.remote_port)
         try:
@@ -145,7 +141,7 @@ class ClientEngine(Engine):
             return proc
             
         except requests.exceptions.RequestException as e:
-            print(e)
+            log.debug(e)
             
         return None
 
@@ -164,10 +160,9 @@ class ClientEngine(Engine):
         try:
             r = requests.post(url, data={"host": host, 'port': port})
             if r.status_code == requests.codes.ok:
-                log.debug(r)
                 return r.text == 'True'
         except requests.exceptions.RequestException as e:
-            print(e)
+            log.debug(e)
         return False
 
     def find_free_port(self, host):
@@ -178,7 +173,7 @@ class ClientEngine(Engine):
                 log.debug(r)
                 return int(r.text)
         except requests.exceptions.RequestException as e:
-            print(e)
+            log.debug(e)
         return False
 
     def file_status(self, file_index, timeout=10):
@@ -188,7 +183,7 @@ class ClientEngine(Engine):
         
         try:
             return FileStatus(index=fs.index, name=fs.name, save_path=fs.save_path, url=fs.url.replace('0.0.0.0', self.settings.remote_host),
-                        size=fs.size, offset=fs.offset, download=fs.download, progress=fs.progress, media_type=fs.media_type)
+                        size=fs.size, offset=fs.offset, download=fs.download, progress=fs.progress, media_type=fs.media_type, priority=fs.priority)
         except:
             return None
 
