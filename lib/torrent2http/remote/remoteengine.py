@@ -6,18 +6,22 @@ from ..util import ensure_fs_encoding
 from . import filesystem, log
 import json
 import base64
-try: 
+try:
     from urllib import url2pathname
+    py3 = False
 except:
     from urllib.request import url2pathname
+    py3 = True
 import os
 import time
 
 try:
     import requests
 except ImportError:
-    import sys, xbmc
-    req_path = os.path.join(xbmc.translatePath("special://home/addons"), "script.module.requests","lib")
+    import sys, xbmc, xbmcvfs
+    if py3: addonspath = xbmcvfs.translatePath("special://home/addons")
+    else: addonspath = xbmc.translatePath("special://home/addons")
+    req_path = os.path.join(addonspath, "script.module.requests","lib")
     if os.path.exists(req_path):
         sys.path.append(req_path)
         import requests

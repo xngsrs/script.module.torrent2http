@@ -5,18 +5,24 @@ import os
 try:
     from urlparse import urljoin
     from urllib import pathname2url
+    py3 = False
 except:
     from urllib.parse import urljoin
     from urllib.request import pathname2url
     import urllib.parse as urllib
+    py3 = True
 
 def path2url(path):
     return urljoin('file:', pathname2url(path))
 
 
 def remote_t2h_torrent_path():
-    import xbmc
-    return xbmc.translatePath('special://temp/rt2h.torrent')
+    if py3:
+        import xbmcvfs
+        return xbmcvfs.translatePath('special://temp/rt2h.torrent')
+    else:
+        import xbmc
+        return xbmc.translatePath('special://temp/rt2h.torrent')
 
     
 def parse(argv, s):

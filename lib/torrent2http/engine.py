@@ -19,8 +19,10 @@ except: pass
 import time
 try:
     import urllib2
+    py3 = False
 except ImportError: 
     import urllib.request as urllib2
+    py3 = True
 try: import httplib
 except: import http.client as httplib
 from os.path import dirname
@@ -246,8 +248,12 @@ class Engine:
         :param path: Download path
         :return: Translated path
         """
-        import xbmc
-        path = xbmc.translatePath(path)
+        if py3:
+            import xbmcvfs
+            path = xbmcvfs.translatePath(path)
+        else:
+            import xbmc
+            path = xbmc.translatePath(path)
         if "://" in path:
             if sys.platform.startswith('win') and path.lower().startswith("smb://"):
                 path = path.replace("smb:", "").replace("/", "\\")
@@ -324,11 +330,10 @@ class Engine:
             if v is not None:
                 if isinstance(v, bool):
                     if v:
-                        args.append(k)
+                        args.append("%s=true" % k)
                     else:
                         args.append("%s=false" % k)
                 else:
-                    args.append(k)
                     if isinstance(v, int):
                         v = str(v)
                     else: 
@@ -336,7 +341,8 @@ class Engine:
                             v = str(v.encode('utf-8').decode('utf-8'))
                         except:
                             pass
-                    args.append(v)
+                    if v:
+                        args.append("%s=%s" % (k,v))
 
         self._log("Invoking %s" % repr(args))
         startupinfo = None
@@ -540,7 +546,7 @@ class Engine:
         self._request('resume')
 
     def priority(self, index, priority):
-        self._request('priority?index=%s&priority=%s' % (index, priority))
+        return self._request('priority?index=%s&priority=%s' % (index, priority))
 
     def stopanddelete(self):
         import xbmcvfs

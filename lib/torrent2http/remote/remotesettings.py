@@ -1,9 +1,8 @@
-﻿import xbmcaddon, xbmc
+﻿import xbmcaddon, xbmc, xbmcvfs
 from . import filesystem
 
 try: _bin_dir = xbmc.translatePath('special://home/addons/script.module.torrent2http/bin').decode('utf-8')
-except: _bin_dir = xbmc.translatePath('special://home/addons/script.module.torrent2http/bin')
-print(_bin_dir.encode('utf-8'))
+except: _bin_dir = xbmcvfs.translatePath('special://home/addons/script.module.torrent2http/bin')
 
 _ADDON_NAME = 'script.module.torrent2http'
 _addon = xbmcaddon.Addon(id=_ADDON_NAME)

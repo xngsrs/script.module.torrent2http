@@ -2,6 +2,11 @@
 import os
 import xbmc, xbmcgui, xbmcvfs, xbmcaddon
 from .net import HTTP
+try:
+    import urllib2
+    py3 = False
+except ImportError:
+    py3 = True
 
 __libbaseurl__ = "https://github.com/xngsrs/script.module.torrent2http/raw/master/bin"
 __settings__ = xbmcaddon.Addon(id='script.module.torrent2http')
@@ -12,12 +17,13 @@ def get_libname(platform):
     return ["torrent2http" + (".exe" if 'windows' in platform else "")]
 
 def log(msg):
+    loginfo = xbmc.LOGINFO if py3 else xbmc.LOGNOTICE
     try:
-        xbmc.log("### [%s]: %s" % (__plugin__,msg,), level=xbmc.LOGNOTICE )
+        xbmc.log("### [%s]: %s" % (__plugin__,msg,), level=loginfo )
     except UnicodeEncodeError:
-        xbmc.log("### [%s]: %s" % (__plugin__,msg.encode("utf-8", "ignore"),), level=xbmc.LOGNOTICE )
+        xbmc.log("### [%s]: %s" % (__plugin__,msg.encode("utf-8", "ignore"),), level=loginfo )
     except:
-        xbmc.log("### [%s]: %s" % (__plugin__,'ERROR LOG',), level=xbmc.LOGNOTICE )
+        xbmc.log("### [%s]: %s" % (__plugin__,'ERROR LOG',), level=loginfo )
 
 def getSettingAsBool(setting):
     return __settings__.getSetting(setting).lower() == "true"

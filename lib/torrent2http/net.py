@@ -9,18 +9,25 @@ import xbmc
 import xbmcgui
 import xbmcvfs
 import requests
+try:
+    import urllib2
+    py3 = False
+except ImportError:
+    py3 = True
 
 def log(msg):
+    loginfo = xbmc.LOGINFO if py3 else xbmc.LOGNOTICE
     try:
-        xbmc.log("### [%s]: %s" % ('torrent2http net',msg,), level=xbmc.LOGNOTICE )
+        xbmc.log("### [%s]: %s" % ('torrent2http net',msg,), level=loginfo )
     except UnicodeEncodeError:
-        xbmc.log("### [%s]: %s" % ('torrent2http net',msg.encode("utf-8", "ignore"),), level=xbmc.LOGNOTICE )
+        xbmc.log("### [%s]: %s" % ('torrent2http net',msg.encode("utf-8", "ignore"),), level=loginfo )
     except:
-        xbmc.log("### [%s]: %s" % ('torrent2http net','ERROR LOG',), level=xbmc.LOGNOTICE )
+        xbmc.log("### [%s]: %s" % ('torrent2http net','ERROR LOG',), level=loginfo )
 
 class HTTP:
     def __init__(self):
-        self._dirname = xbmc.translatePath('special://temp')
+        if py3: self._dirname = xbmcvfs.translatePath('special://temp')
+        else: self._dirname = xbmc.translatePath('special://temp')
         for subdir in ('xbmcup', 'script.module.libtorrent'):
             self._dirname = os.path.join(self._dirname, subdir)
             if not xbmcvfs.exists(self._dirname):
