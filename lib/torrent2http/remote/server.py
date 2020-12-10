@@ -59,9 +59,12 @@ def statgui():
     current = os.path.dirname(__file__)
 
     text = ''
-    with open(os.path.join(current, 'statgui.css'), 'r') as css:
-        text = css.read()
-
+    try:
+        with open(os.path.join(current, 'statgui.css'), 'r') as css:
+            text = css.read()
+    except:
+        with open(os.path.join(current, 'statgui.css'), 'r', encoding="utf-8") as css:
+            text = css.read()
     return text
 
 
