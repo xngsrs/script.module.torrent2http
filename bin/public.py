@@ -12,7 +12,9 @@ def get_libname(platform):
 class Public:
     def __init__( self ):
         self.platforms=[]
-        self.root=os.path.dirname(__file__)
+        #self.root=os.path.dirname(__file__)
+        self.root = os.path.dirname(os.path.realpath(__file__))
+        print(self.root)
         for dir in os.listdir(self.root):
             if os.path.isdir(os.path.join(self.root,dir)):
                 self.platforms.append(dir)
@@ -25,6 +27,7 @@ class Public:
                 self.platform=platform
                 self.libdir = os.path.join(self.root, self.platform)
                 self.libpath = os.path.join(self.libdir, self.libname)
+                self.libpathsecond = os.path.join(self.libdir, 'libc++_shared.so')
                 self.sizepath=self.libpath+'.size.txt'
                 self.zipname=self.libname+'.zip'
                 zippath=os.path.join(self.libdir, self.zipname)
@@ -50,9 +53,13 @@ class Public:
     def _makezip(self):
         open( self.sizepath, "w" ).write( str(os.path.getsize(self.libpath)) )
         os.chdir(self.libdir)
-        os.system('del %s' % (self.zipname))
-        os.system('"C:\\Program Files\\7-Zip\\7z.exe" a %s.zip %s' %
+        os.system('rm %s' % (self.zipname))
+        if os.path.exists(self.libpathsecond):
+            os.system('zip %s.zip %s libc++_shared.so' %
                   (self.libname, self.libname))
+        else:
+            os.system('zip %s.zip %s' %
+                    (self.libname, self.libname))
         os.chdir(self.root)
         #os.system('"C:\\Program Files\\7-Zip\\7z.exe" a %s.zip %s' %
         #          (self.platform['system']+os.sep+self.libname, self.platform['system']+os.sep+self.libname))
