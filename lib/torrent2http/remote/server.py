@@ -41,8 +41,11 @@ function resume_procces(pid) {
 '''
 
 def _TD_(val):
-    if isinstance(val, unicode):
-        val = val.encode('utf-8')
+    try:
+        if isinstance(val, unicode):
+            val = val.encode('utf-8')
+    except:
+        pass
 
     return "<td>" + str(val) + "</td>"
 
@@ -264,6 +267,8 @@ class HTTP:
             return None
         
     def do_popen(self):
+        import base64
+        import json
         try:
             debug('do_popen')
             
@@ -276,8 +281,12 @@ class HTTP:
                     'dict=' + dict_str]
 
             engn = parse(argv, s)
-            logs(engn)
-            self.engines.append(engn) 
+            cmdp = base64.b64decode(dict_str)
+            cmdp = json.loads(cmdp)
+            cmdps = cmdp.get('cmdline_proc') or None
+            if cmdps:
+                return engn
+            self.engines.append(engn)
 
             return str(engn.pid()) + '.' + str(engn.bind_port)
         except BaseException as e:

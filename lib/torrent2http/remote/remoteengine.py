@@ -80,7 +80,7 @@ class ClientEngine(Engine):
                 'user_agent', 'startup_timeout', 'state_file', 'enable_utp', 'enable_tcp',
                 'debug_alerts', 'logger', 'torrent_connect_boost', 'connection_speed',
                 'peer_connect_timeout', 'request_timeout', 'min_reconnect_time', 'max_failcount',
-                'dht_routers', 'trackers', 'tuned_storage']
+                'dht_routers', 'trackers', 'tuned_storage', 'cmdline_proc']
             
         i = 0
         for arg in args:
@@ -130,7 +130,8 @@ class ClientEngine(Engine):
             r = requests.post(url, data={"args": args_str, 'torrent_data': tdata, "dict": dict_str})
             if r.text == 'None':
                 return None
-                
+            if self.cmdline_proc:
+                return r.text
             parts = r.text.split('.') 
             
             if len(parts) > 1:
@@ -241,6 +242,7 @@ class ClientEngine(Engine):
             '--dht-routers': ",".join(self.dht_routers),
             '--trackers': ",".join(self.trackers),
             '--tuned-storage': self.tuned_storage,
+            '--cmdline-proc': self.cmdline_proc,
         }
 
         args = []
@@ -266,7 +268,10 @@ class ClientEngine(Engine):
 
         self._log("Invoking %s" % " ".join(args))
         try:
-            self.process = self.MyPopen(args)
+            if self.cmdline_proc:
+                return self.MyPopen(args)
+            else:
+                self.process = self.MyPopen(args)
         except OSError as e:
             raise Error("Can't start torrent2http: %r" % e, Error.POPEN_ERROR)
 

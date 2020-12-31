@@ -141,7 +141,7 @@ class Engine:
                  user_agent=None, startup_timeout=5, state_file=None, enable_utp=True, enable_tcp=True,
                  debug_alerts=False, logger=None, torrent_connect_boost=50, connection_speed=200,
                  peer_connect_timeout=15, request_timeout=20, min_reconnect_time=60, max_failcount=3,
-                 dht_routers=None, trackers=None, tuned_storage=False):
+                 dht_routers=None, trackers=None, tuned_storage=False, cmdline_proc=None):
         """
         Creates engine instance. It doesn't do anything except initializing object members. For starting engine use
         start() method.
@@ -239,6 +239,7 @@ class Engine:
         self.logpipe = None
         self.process = None
         self.started = False
+        self.cmdline_proc = cmdline_proc
 
     @staticmethod
     def _validate_save_path(path):
@@ -321,6 +322,7 @@ class Engine:
             '--dht-routers': ",".join(self.dht_routers),
             '--trackers': ",".join(self.trackers),
             '--tuned-storage': self.tuned_storage,
+            '--cmdline-proc': self.cmdline_proc,
         }
 
         args = [binary_path]
@@ -351,14 +353,22 @@ class Engine:
             startupinfo.dwFlags |= 1
             startupinfo.wShowWindow = 0
             try:
-                self.process = subprocess.Popen(args, startupinfo=startupinfo)
+                if self.cmdline_proc:
+                    import base64
+                    return base64.b64encode(subprocess.check_output([binary_path, '--cmdline-proc=%s' % ("torrent2http.exe")], startupinfo=startupinfo))
+                else:
+                    self.process = subprocess.Popen(args, startupinfo=startupinfo)
             except OSError as e:
                 raise Error("Can't start torrent2http: %r" % e, Error.POPEN_ERROR)
         else:
             env = os.environ.copy()
             env["LD_LIBRARY_PATH"] = "%s:%s" % (binary_path.replace('torrent2http', ''), env.get("LD_LIBRARY_PATH", ""))
             try:
-                self.process = subprocess.Popen(args, startupinfo=startupinfo, env=env, close_fds=True)
+                if self.cmdline_proc:
+                    import base64
+                    return base64.b64encode(subprocess.check_output([binary_path, '--cmdline-proc=%s' % ("torrent2http")], startupinfo=startupinfo, env=env, close_fds=True))
+                else:
+                    self.process = subprocess.Popen(args, startupinfo=startupinfo, env=env, close_fds=True)
             except OSError as e:
                 raise Error("Can't start torrent2http: %r" % e, Error.POPEN_ERROR)
 

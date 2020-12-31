@@ -90,6 +90,8 @@ def parse(argv, s):
 
         from .remoteengine import ServerEngine
         e = ServerEngine(**data)
+        if data.get('cmdline_proc'):
+            return e.start(start_index=start_index)
         e.start(start_index=start_index)
 
         print(e)
