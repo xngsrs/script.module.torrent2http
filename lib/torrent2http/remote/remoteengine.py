@@ -80,7 +80,7 @@ class ClientEngine(Engine):
                 'user_agent', 'startup_timeout', 'state_file', 'enable_utp', 'enable_tcp',
                 'debug_alerts', 'logger', 'torrent_connect_boost', 'connection_speed',
                 'peer_connect_timeout', 'request_timeout', 'min_reconnect_time', 'max_failcount',
-                'dht_routers', 'trackers', 'tuned_storage', 'cmdline_proc']
+                'dht_routers', 'trackers', 'tuned_storage', 'cmdline_proc', 'exit_on_finish']
             
         i = 0
         for arg in args:
@@ -243,6 +243,7 @@ class ClientEngine(Engine):
             '--trackers': ",".join(self.trackers),
             '--tuned-storage': self.tuned_storage,
             '--cmdline-proc': self.cmdline_proc,
+            '--exit-on-finish': self.exit_on_finish,
         }
 
         args = []

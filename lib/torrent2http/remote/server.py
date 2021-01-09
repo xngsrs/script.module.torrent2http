@@ -164,7 +164,10 @@ class HTTP:
                     + _TD_(kill(pid))
                     + _TD_(pstop(pid))
                     + _TD_(presume(pid))) 
-            except:
+            except BaseException as e:
+                if str(e) == str('torrent2http has crashed.'):
+                    engn = self.engine_by(eng.pid())
+                    self.engines.remove(engn)
                 pass
 
             #N += 1
