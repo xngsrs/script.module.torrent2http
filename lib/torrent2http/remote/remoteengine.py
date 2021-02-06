@@ -32,7 +32,7 @@ class RemoteProcess:
         self.engine = client_engine
 
     def poll(self):
-        url = "http://%s:%d/poll" % (self.engine.settings.remote_host, self.engine.settings.remote_port)
+        url = "http://%s:%s/poll" % (self.engine.settings.remote_host, self.engine.settings.remote_port)
         r = requests.get(url, params={'pid': self.engine.process.pid})
         
         if r.status_code == requests.codes.ok:
@@ -44,7 +44,7 @@ class RemoteProcess:
             return None
 
     def wait(self, timeout=None):
-        url = "http://%s:%d/wait" % (self.engine.settings.remote_host, self.engine.settings.remote_port)
+        url = "http://%s:%s/wait" % (self.engine.settings.remote_host, self.engine.settings.remote_port)
         r = requests.get(url, params={'pid': self.engine.process.pid})
         
         if r.status_code == requests.codes.ok:
@@ -53,11 +53,11 @@ class RemoteProcess:
             return 0
 
     def terminate(self):
-        url = "http://%s:%d/terminate" % (self.engine.settings.remote_host, self.engine.settings.remote_port)
+        url = "http://%s:%s/terminate" % (self.engine.settings.remote_host, self.engine.settings.remote_port)
         requests.get(url, params={'pid': self.engine.process.pid})
 
     def kill(self):
-        url = "http://%s:%d/kill" % (self.engine.settings.remote_host, self.engine.settings.remote_port)
+        url = "http://%s:%s/kill" % (self.engine.settings.remote_host, self.engine.settings.remote_port)
         requests.get(url, params={'pid': self.engine.process.pid})
 
         
@@ -91,7 +91,8 @@ class ClientEngine(Engine):
 
     @staticmethod
     def _torrent_data_by_url(url):
-        path = url2pathname(url.replace('file:', '')).decode('utf-8')
+        try: path = url2pathname(url.replace('file:', '')).decode('utf-8')
+        except: path = url2pathname(url.replace('file:', ''))
         if filesystem.exists(path):
             with filesystem.fopen(path, 'rb') as t:
                 return t.read()
@@ -125,7 +126,7 @@ class ClientEngine(Engine):
 
         log.debug(o)
 
-        url = "http://%s:%d/popen" % (self.settings.remote_host, self.settings.remote_port)
+        url = "http://%s:%s/popen" % (self.settings.remote_host, self.settings.remote_port)
         try:
             r = requests.post(url, data={"args": args_str, 'torrent_data': tdata, "dict": dict_str})
             if r.text == 'None':
@@ -161,7 +162,7 @@ class ClientEngine(Engine):
         return path
 
     def can_bind(self, host, port):
-        url = "http://%s:%d/can_bind" % (self.settings.remote_host, self.settings.remote_port)
+        url = "http://%s:%s/can_bind" % (self.settings.remote_host, self.settings.remote_port)
         try:
             r = requests.post(url, data={"host": host, 'port': port})
             if r.status_code == requests.codes.ok:
@@ -171,7 +172,7 @@ class ClientEngine(Engine):
         return False
 
     def find_free_port(self, host):
-        url = "http://%s:%d/find_free_port" % (self.settings.remote_host, self.settings.remote_port)
+        url = "http://%s:%s/find_free_port" % (self.settings.remote_host, self.settings.remote_port)
         try:
             r = requests.post(url, data={"host": host})
             if r.status_code == requests.codes.ok:
@@ -191,6 +192,16 @@ class ClientEngine(Engine):
                         size=fs.size, offset=fs.offset, download=fs.download, progress=fs.progress, media_type=fs.media_type, priority=fs.priority)
         except:
             return None
+    
+    def file_info(self, timeout=10):
+        fs = Engine.file_info(self, timeout)
+
+        from torrent2http import FileInfo
+        
+        try:
+            return FileInfo(name=fs.name, save_path=fs.save_path, url=fs.url.replace('0.0.0.0', self.settings.remote_host), size=fs.size, bufferx=fs.bufferx)
+        except BaseException as e:
+            return None
 
     def start(self, start_index=None):
         '''
@@ -198,7 +209,7 @@ class ClientEngine(Engine):
             port = self.find_free_port(self.bind_host)
             if port is False:
                 raise Error("Can't find port to bind torrent2http", Error.BIND_ERROR)
-            self._log("Can't bind to %s:%s, so we found another port: %d" % (self.bind_host, self.bind_port, port))
+            self._log("Can't bind to %s:%s, so we found another port: %s" % (self.bind_host, self.bind_port, port))
             self.bind_port = port
         '''
             
@@ -299,7 +310,7 @@ class ClientEngine(Engine):
         url = None
         pid = None
         if self.process:
-            url = "http://%s:%d/close" % (self.settings.remote_host, self.settings.remote_port)
+            url = "http://%s:%s/close" % (self.settings.remote_host, self.settings.remote_port)
             pid = self.process.pid
             
         Engine.close(self)

@@ -28,12 +28,12 @@ except: import http.client as httplib
 from os.path import dirname
 from .download import LibraryManager
 
-#import logpipe
+import logpipe
 import mimetypes
 import xbmc
 from .error import Error
 from .platform import Platform
-from . import SessionStatus, FileStatus, PeerInfo, MediaType, Encryption
+from . import SessionStatus, FileStatus, FileInfo, PeerInfo, MediaType, Encryption
 from .util import can_bind, find_free_port, ensure_fs_encoding
 
 
@@ -42,7 +42,7 @@ class Engine:
     This is python binding class to torrent2http client.
     """
     SUBTITLES_FORMATS = ['.aqt', '.gsub', '.jss', '.sub', '.ttxt', '.pjs', '.psb', '.rt', '.smi', '.stl',
-                         '.ssf', '.srt', '.ssa', '.ass', '.usf', '.idx']
+                         '.ssf', '.srt', '.ssa', '.ass', '.usf']
 
     def _ensure_binary_executable(self, path):
         st = os.stat(path)
@@ -63,13 +63,13 @@ class Engine:
         return True
     
     def _log(self, message):
-        if self.logger:
-            self.logger(message)
-        else:
-            try:
-                xbmc.log("[torrent2http] %s" % message, xbmc.LOGDEBUG)
-            except UnicodeEncodeError:
-                xbmc.log("[torrent2http] %s" % message.encode("utf-8", "ignore"), xbmc.LOGDEBUG )
+        #if self.logger:
+            #self.logger(message)
+        #else:
+        try:
+            xbmc.log("[torrent2http] %s" % message, xbmc.LOGNOTICE)
+        except UnicodeEncodeError:
+            xbmc.log("[torrent2http] %s" % message.encode("utf-8", "ignore"), xbmc.LOGNOTICE )
 
     def _get_binary_path(self, binaries_path):
         """
@@ -80,9 +80,6 @@ class Engine:
         """
 
         arch = self.platform.arch
-        # Always use 32 bit binary on Windows
-        if self.platform.system == 'windows':
-            arch = arch.replace('x64', 'x86')
 
         binary = "torrent2http" + (".exe" if self.platform.system == 'windows' else "")
         binary_dir = os.path.join(binaries_path, "%s_%s" % (self.platform.system, arch))
@@ -280,7 +277,7 @@ class Engine:
             port = find_free_port(self.bind_host)
             if port is False:
                 raise Error("Can't find port to bind torrent2http", Error.BIND_ERROR)
-            self._log("Can't bind to %s:%s, so we found another port: %d" % (self.bind_host, self.bind_port, port))
+            self._log("Can't bind to %s:%s, so we found another port: %s" % (self.bind_host, self.bind_port, port))
             self.bind_port = port
 
         kwargs = {
@@ -363,6 +360,7 @@ class Engine:
             except OSError as e:
                 raise Error("Can't start torrent2http: %r" % e, Error.POPEN_ERROR)
         else:
+            self.logpipe = logpipe.LogPipe(self._log)
             env = os.environ.copy()
             env["LD_LIBRARY_PATH"] = "%s:%s" % (binary_path.replace('torrent2http', ''), env.get("LD_LIBRARY_PATH", ""))
             try:
@@ -370,7 +368,7 @@ class Engine:
                     import base64
                     return base64.b64encode(subprocess.check_output([binary_path, '--cmdline-proc=%s' % ("torrent2http")], startupinfo=startupinfo, env=env, close_fds=True))
                 else:
-                    self.process = subprocess.Popen(args, startupinfo=startupinfo, env=env, close_fds=True)
+                    self.process = subprocess.Popen(args, stderr=self.logpipe, stdout=self.logpipe, startupinfo=startupinfo, env=env, close_fds=True)
             except OSError as e:
                 raise Error("Can't start torrent2http: %r" % e, Error.POPEN_ERROR)
 
@@ -470,6 +468,14 @@ class Engine:
             except StopIteration:
                 raise Error("Requested file index (%d) is invalid" % file_index, Error.INVALID_FILE_INDEX,
                             file_index=file_index)
+    
+    def file_info(self, timeout=10):
+        try:
+            filex = self._decode(self._request('lsfile', timeout))['file'][0]
+            if filex:
+                res = FileInfo(**filex)
+                return res
+        except: return None
 
     def peers(self, timeout=10):
         """

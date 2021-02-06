@@ -20,7 +20,7 @@ class Settings:
         
         if self.mrsprole:
             self.storage_path  = self.mrgetset('storage')
-            self.remote_host    = '0.0.0.0'
+            self.remote_host    = self.get_ip()
             
         else:
             try:
@@ -33,9 +33,9 @@ class Settings:
         self.storage_path  = filesystem.abspath(self.storage_path)
         
         try:
-            self.remote_port    = int(_addon.getSetting("remote_port"))
+            self.remote_port    = _addon.getSetting("remote_port")
         except:
-            self.remote_port = 28282
+            self.remote_port = '28282'
 
         self.binaries_path = _bin_dir
 
@@ -45,3 +45,16 @@ class Settings:
         if self.mrsp and setting:
             return xbmcaddon.Addon(id='plugin.video.romanianpack').getSetting(setting)
         return False
+
+    def get_ip(self):
+        import socket
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            # doesn't even have to be reachable
+            s.connect(('10.255.255.255', 1))
+            IP = s.getsockname()[0]
+        except Exception:
+            IP = '127.0.0.1'
+        finally:
+            s.close()
+        return IP

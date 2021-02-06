@@ -64,7 +64,7 @@ class LibraryManager():
                 self.http = HTTP()
                 self.http.fetch(url, download=dest + ".zip", progress=True)
                 log("%s -> %s" % (url, dest))
-                xbmc.sleep(500)
+                xbmc.sleep(2000)
                 try:
                     patoolib.extract_archive('%s.zip' % dest, outdir=self.dest_path)
                 except:

@@ -36,6 +36,8 @@ SessionStatus = namedtuple('SessionStatus', "name, state, state_str, error, prog
 
 FileStatus = namedtuple('FileStatus', "name, save_path, url, size, offset, download, progress, index, media_type, priority")
 
+FileInfo = namedtuple('FileInfo', "name, save_path, url, size, bufferx")
+
 PeerInfo = namedtuple('PeerInfo', "ip, flags, source, up_speed, down_speed, total_upload, total_download, "
                                   "country, client")
 
