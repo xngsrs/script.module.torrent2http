@@ -28,7 +28,7 @@ except: import http.client as httplib
 from os.path import dirname
 from .download import LibraryManager
 
-import logpipe
+#import logpipe
 import mimetypes
 import xbmc
 from .error import Error
@@ -63,13 +63,13 @@ class Engine:
         return True
     
     def _log(self, message):
-        #if self.logger:
-            #self.logger(message)
-        #else:
-        try:
-            xbmc.log("[torrent2http] %s" % message, xbmc.LOGNOTICE)
-        except UnicodeEncodeError:
-            xbmc.log("[torrent2http] %s" % message.encode("utf-8", "ignore"), xbmc.LOGNOTICE )
+        if self.logger:
+            self.logger(message)
+        else:
+            try:
+                xbmc.log("[torrent2http] %s" % message, xbmc.LOGDEBUG)
+            except UnicodeEncodeError:
+                xbmc.log("[torrent2http] %s" % message.encode("utf-8", "ignore"), xbmc.LOGDEBUG )
 
     def _get_binary_path(self, binaries_path):
         """
@@ -360,7 +360,6 @@ class Engine:
             except OSError as e:
                 raise Error("Can't start torrent2http: %r" % e, Error.POPEN_ERROR)
         else:
-            self.logpipe = logpipe.LogPipe(self._log)
             env = os.environ.copy()
             env["LD_LIBRARY_PATH"] = "%s:%s" % (binary_path.replace('torrent2http', ''), env.get("LD_LIBRARY_PATH", ""))
             try:
@@ -368,7 +367,7 @@ class Engine:
                     import base64
                     return base64.b64encode(subprocess.check_output([binary_path, '--cmdline-proc=%s' % ("torrent2http")], startupinfo=startupinfo, env=env, close_fds=True))
                 else:
-                    self.process = subprocess.Popen(args, stderr=self.logpipe, stdout=self.logpipe, startupinfo=startupinfo, env=env, close_fds=True)
+                    self.process = subprocess.Popen(args, startupinfo=startupinfo, env=env, close_fds=True)
             except OSError as e:
                 raise Error("Can't start torrent2http: %r" % e, Error.POPEN_ERROR)
 

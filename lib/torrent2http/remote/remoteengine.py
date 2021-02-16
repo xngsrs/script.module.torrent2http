@@ -199,7 +199,7 @@ class ClientEngine(Engine):
         from torrent2http import FileInfo
         
         try:
-            return FileInfo(name=fs.name, save_path=fs.save_path, url=fs.url.replace('0.0.0.0', self.settings.remote_host), size=fs.size, bufferx=fs.bufferx)
+            return FileInfo(name=fs.name, save_path=fs.save_path, url=fs.url.replace('0.0.0.0', self.settings.remote_host), size=fs.size, bufferx=fs.bufferx, download=fs.download, progress=fs.progress, state=fs.state, total_download=fs.total_download, total_upload=fs.total_upload, download_rate=fs.download_rate, upload_rate=fs.upload_rate, num_peers=fs.num_peers, num_seeds=fs.num_seeds, total_seeds=fs.total_seeds, total_peers=fs.total_peers)
         except BaseException as e:
             return None
 
