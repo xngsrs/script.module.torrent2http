@@ -383,11 +383,16 @@ class Server:
         from .remoteengine import ClientEngine as Engine
 
         if s.mrsprole:
-            resumefolder = filesystem.join(s.storage_path, '.resume')
+            try: storagepath = s.storage_path.decode()
+            except: storagepath = s.storage_path
+            try: resumefolder = filesystem.join(storagepath, '.resume').decode()
+            except: resumefolder = filesystem.join(storagepath, '.resume')
             if filesystem.exists(resumefolder):
-                allresume = [f for f in filesystem.listdir(resumefolder) if filesystem.isfile(filesystem.join(resumefolder, f))]
+                try: allresume = [f for f in filesystem.listdir(resumefolder) if filesystem.isfile(filesystem.join(resumefolder, f).decode())]
+                except: allresume = [f for f in filesystem.listdir(resumefolder) if filesystem.isfile(filesystem.join(resumefolder, f))]
                 for i in allresume:
-                    filet = filesystem.join(resumefolder, i)
+                    try: filet = filesystem.join(resumefolder, i).decode()
+                    except: filet = filesystem.join(resumefolder, i)
                     encryption = int(s.mrgetset('encryption'))
                     upload_limit = int(s.mrgetset('upload_limit')) if s.mrgetset('upload_limit') != '' else 0
                     download_limit = int(s.mrgetset('download_limit')) if s.mrgetset('download_limit') != '' else 0
@@ -421,7 +426,7 @@ class Server:
                                         keep_files=keep_files, user_agent=user_agent, resume_file=resume_file, enable_dht=enable_dht,
                                         enable_lsd=enable_lsd, enable_upnp=enable_upnp, enable_natpmp=enable_natpmp,
                                         no_sparse=no_sparse, enable_utp=enable_utp, enable_scrape=enable_scrape, enable_tcp=enable_tcp)
-                    engine.start()
+                    engine.start(9999)
 
     def _run(self):
         debug('Running in thread')

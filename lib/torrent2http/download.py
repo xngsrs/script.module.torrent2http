@@ -68,10 +68,10 @@ class LibraryManager():
                 try:
                     patoolib.extract_archive('%s.zip' % dest, outdir=self.dest_path)
                 except:
-                    xbmc.executebuiltin('XBMC.Extract("%s.zip")' % (dest), True)
+                    xbmc.executebuiltin('Extract("%s.zip")' % (dest), True)
                 xbmcvfs.delete(dest + ".zip")
             except BaseException as e:
                 log(e)
                 text = 'Failed download %s!' % libname
-                xbmc.executebuiltin("XBMC.Notification(%s,%s,%s)" % (__plugin__,text,750))
+                xbmc.executebuiltin("Notification(%s,%s,%s)" % (__plugin__,text,750))
         return True

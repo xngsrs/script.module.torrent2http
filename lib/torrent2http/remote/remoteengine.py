@@ -328,11 +328,14 @@ class ServerEngine(Engine):
         if 'resume_file' in kwargs:
             if kwargs['resume_file']:
                 resume_path = filesystem.join(self.settings.storage_path, '.resume')
+                if py3: resume_path = filesystem.join(self.settings.storage_path.decode(), '.resume').decode()
                 if not filesystem.exists(resume_path):
                     filesystem.makedirs(resume_path)
                 resume_name = filesystem.basename(kwargs['resume_file'])
+                if py3:
+                    resume_name = resume_name.decode()
                 resume_name = resume_name.split('\\')[-1]
-                kwargs['resume_file'] = filesystem.join(resume_path, resume_name)
+                kwargs['resume_file'] = filesystem.join(resume_path, resume_name).decode() if py3 else filesystem.join(resume_path, resume_name)
                 log.debug('resume_file is: ' + kwargs['resume_file'])
 
         kwargs['bind_host'] = self.settings.remote_host

@@ -37,7 +37,8 @@ def get_path(path):
 
 
 def exists(path):
-    return os.path.exists(get_path(path))
+    try: return os.path.exists(get_path(path).decode())
+    except: return os.path.exists(get_path(path))
 
 
 def getcwd():
@@ -123,7 +124,8 @@ def join(path, *paths):
 
 def listdir(path):
     ld = []
-    path = get_path(path)
+    try: path = get_path(path).decode()
+    except: path = get_path(path)
     if path.startswith(r'\\'):
         with save_make_chdir_context(path):
             for p in os.listdir('.'):
