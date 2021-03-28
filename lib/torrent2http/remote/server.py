@@ -426,7 +426,10 @@ class Server:
                                         keep_files=keep_files, user_agent=user_agent, resume_file=resume_file, enable_dht=enable_dht,
                                         enable_lsd=enable_lsd, enable_upnp=enable_upnp, enable_natpmp=enable_natpmp,
                                         no_sparse=no_sparse, enable_utp=enable_utp, enable_scrape=enable_scrape, enable_tcp=enable_tcp)
-                    engine.start(9999)
+                    if s.mrspstartpaused: 
+                        engine.start(-1)
+                    else:
+                        engine.start(9999)
 
     def _run(self):
         debug('Running in thread')

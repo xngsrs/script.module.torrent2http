@@ -17,6 +17,7 @@ class Settings:
         except: self.role = _addon.getSetting("role")
         
         self.mrsprole = (True if self.mrgetset('experimental_server') == 'true' else False) if self.mrsp else False
+        self.mrspstartpaused = (True if self.mrgetset('start_torrents_paused') == 'true' else False) if self.mrsp else False
         
         if self.mrsprole:
             self.storage_path  = self.mrgetset('storage')
